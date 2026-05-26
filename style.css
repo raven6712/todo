@@ -1,0 +1,230 @@
+
+
+:root {
+  --surface:  #161B22;
+  --border:   #30363D;
+  --cyan:     #0519fa;
+  --purple:   #C77DFF;
+  --green:    #2EE59D;
+  --pink:     #fa033c;
+  --yellow:   #FFD60A;
+  --text:     #0e0e0e;
+  --muted:    #181717;
+}
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-image: url(bon.jpg);
+  background-repeat:no-repeat;
+  background-position:center;
+  color: var(--text);
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem;
+}
+
+h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--cyan);
+  margin-bottom: 1.8rem;
+  letter-spacing: .02em;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+
+.container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 560px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
+}
+
+
+.input-row {
+  display: flex;
+  gap: .6rem;
+  margin-bottom: 1.6rem;
+}
+
+#taskInput {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: .65rem 1rem;
+  border-radius: 8px;
+  font-size: .95rem;
+  font-family: inherit;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+#taskInput::placeholder {
+  color: var(--muted);
+}
+
+#taskInput:focus {
+  outline: none;
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(0, 245, 255, .12);
+}
+
+
+#addBtn {
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: .65rem 1.3rem;
+  font-weight: 700;
+  font-size: .95rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity .2s, transform .15s;
+  white-space: nowrap;
+}
+
+#addBtn:hover {
+  opacity: .88;
+  transform: translateY(-1px);
+}
+
+#addBtn:active {
+  transform: translateY(0);
+}
+
+
+#taskList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+
+#taskList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  transition: border-color .2s, background .2s;
+  animation: slideIn .25s ease;
+}
+
+#taskList li:hover {
+  border-color: rgba(0, 245, 255, .3);
+  background: rgba(0, 245, 255, .03);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+#taskList li > span {
+  flex: 1;
+  font-size: .92rem;
+  line-height: 1.4;
+  word-break: break-word;
+  transition: color .2s, text-decoration .2s;
+}
+
+#taskList li.completed {
+  opacity: .55;
+  border-color: rgba(46, 229, 157, .2);
+}
+
+#taskList li.completed > span {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.task-buttons {
+  display: flex;
+  gap: .4rem;
+  flex-shrink: 0;
+}
+
+.task-buttons button {
+  border: none;
+  border-radius: 7px;
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, transform .15s;
+  font-family: inherit;
+}
+
+.task-buttons button:hover {
+  transform: scale(1.12);
+}
+
+/* Terminer ✓ */
+.done-btn {
+  background: rgba(46, 229, 157, .12);
+  color: var(--green);
+  border: 1px solid rgba(46, 229, 157, .3) ;
+}
+
+.done-btn:hover {
+  background: rgba(46, 229, 157, .25) ;
+}
+
+
+.edit-btn {
+  background: rgba(199, 125, 255, .12);
+  color: var(--purple);
+  border: 1px solid rgba(199, 125, 255, .3) ;
+}
+
+.edit-btn:hover {
+  background: rgba(199, 125, 255, .25) ;
+}
+
+/* Supprimer 🗑 */
+.delete-btn {
+  background: rgba(1, 1, 1, 0.12);
+  color: var(--pink);
+  border: 1px solid rgba(239, 71, 111, .3) ;
+}
+
+.delete-btn:hover {
+  background: rgba(239, 71, 111, .25) ;
+}
+
+
+#taskList:empty::after {
+  content: 'Aucune tâche pour l\'instant…';
+  display: block;
+  text-align: center;
+  color: var(--muted);
+  font-size: .88rem;
+  padding: 1.2rem 0;
+}
+
+@media (max-width: 480px) {
+  .container  { padding: 1.2rem; }
+  .input-row  { flex-direction: column; }
+  #addBtn     { width: 100%; }
+}
