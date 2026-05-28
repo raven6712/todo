@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ma To-Do List — UY1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="badge">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 7v10l9 5 9-5V7z"/></svg>
+    Que fais-tu aujourd'hui
+  </div>
+  <h1>Jordy <span>To-Do</span> Liste</h1>
+  <p>Organise tes tâches, réussis tes examens </p>
+</header>
+
+<main>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="cnt-total">0</div><div class="stat-label">Total</div></div>
+    <div class="stat"><div class="stat-num" id="cnt-done">0</div><div class="stat-label">Faites</div></div>
+    <div class="stat"><div class="stat-num" id="cnt-left">0</div><div class="stat-label">Restantes</div></div>
+  </div>
+
+  <!-- Add task -->
+  <div class="add-box">
+    <div class="add-row">
+      <input type="text" id="task-input" placeholder="Ajouter une tâche… ex: Réviser les TD de Maths" maxlength="120"/>
+      <button class="btn-add" onclick="addTask()">+ Ajouter</button>
+    </div>
+    <div class="meta-row">
+      <select id="cat-select">
+        <option value="Cours"> Cours</option>
+        <option value="TD/TP">TD / TP</option>
+        <option value="Examen"> Examen</option>
+        <option value="Projet">Projet</option>
+        <option value="Personnel"> Personnel</option>
+        <option value="Autre">Autre</option>
+      </select>
+      <select id="prio-select">
+        <option value="normal">Priorité normale</option>
+        <option value="urgent">🔴 Urgent</option>
+        <option value="faible">🟡 Faible</option>
+      </select>
+      <input type="date" id="date-input"/>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all', this)">Toutes</button>
+    <button class="filter-btn" onclick="setFilter('todo', this)">À faire</button>
+    <button class="filter-btn" onclick="setFilter('done', this)">Faites</button>
+    <button class="filter-btn" onclick="setFilter('urgent', this)">🔴 Urgentes</button>
+  </div>
+
+  <!-- Clear -->
+  <div class="clear-wrap">
+    <button class="btn-clear" onclick="clearDone()">Supprimer les tâches faites</button>
+  </div>
+
+  <!-- Task list -->
+  <div id="task-list"></div>
+
+</main>
+
+<script>
+  let tasks = JSON.parse(localStorage.getItem('uy1-tasks') || '[]');
+  let filter = 'all';
+
+  function save() {
+    localStorage.setItem('uy1-tasks', JSON.stringify(tasks));
+  }
+
+  function addTask() {
+    const input = document.getElementById('task-input');
+    const text = input.value.trim();
+    if (!text) { input.focus(); return; }
+
+    tasks.unshift({
+      id: Date.now(),
+      text,
+      cat: document.getElementById('cat-select').value,
+      prio: document.getElementById('prio-select').value,
+      date: document.getElementById('date-input').value,
+      done: false,
+      createdAt: new Date().toISOString()
+    });
+
+    input.value = '';
+    document.getElementById('prio-select').value = 'normal';
+    document.getElementById('date-input').value = '';
+    save();
+    render();
+    input.focus();
+  }
+
+  function toggleDone(id) {
+    const t = tasks.find(t => t.id === id);
+    if (t) { t.done = !t.done; save(); render(); }
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    save(); render();
+  }
+
+  function clearDone() {
+    if (!tasks.some(t => t.done)) return;
+    if (confirm('Supprimer toutes les tâches faites ?')) {
+      tasks = tasks.filter(t => !t.done);
+      save(); render();
+    }
+  }
+
+  function setFilter(f, btn) {
+    filter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function isOverdue(dateStr) {
+    if (!dateStr) return false;
+    return new Date(dateStr) < new Date(new Date().toDateString());
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
+  }
+
+  function render() {
+    let visible = tasks;
+    if (filter === 'todo') visible = tasks.filter(t => !t.done);
+    if (filter === 'done') visible = tasks.filter(t => t.done);
+    if (filter === 'urgent') visible = tasks.filter(t => t.prio === 'urgent');
+
+    const list = document.getElementById('task-list');
+
+    if (visible.length === 0) {
+      list.innerHTML = `<div class="empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12l2 2 4-4"/>
+        </svg>
+        <p>${filter === 'done' ? 'Aucune tâche terminée.' : 'Aucune tâche ici. Ajoute-en une !'}</p>
+      </div>`;
+    } else {
+      list.innerHTML = visible.map(t => {
+        const prioClass = { urgent:'pill-urgent', normal:'pill-normal', faible:'pill-faible' }[t.prio];
+        const prioLabel = { urgent:'Urgent', normal:'Normal', faible:'Faible' }[t.prio];
+        const over = isOverdue(t.date) && !t.done;
+        return `
+        <div class="task-item${t.done ? ' done' : ''}" id="task-${t.id}">
+          <div class="check-wrap">
+            <input type="checkbox" id="cb-${t.id}" ${t.done ? 'checked' : ''} onchange="toggleDone(${t.id})"/>
+            <label for="cb-${t.id}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </label>
+          </div>
+          <div class="task-body">
+            <div class="task-text">${escHtml(t.text)}</div>
+            <div class="task-meta">
+              <span class="cat-pill">${escHtml(t.cat)}</span>
+              <span class="pill ${prioClass}">${prioLabel}</span>
+              ${t.date ? `<span class="due-date${over?' overdue':''}">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                ${over ? '⚠ ' : ''}${formatDate(t.date)}
+              </span>` : ''}
+            </div>
+          </div>
+          <button class="btn-del" onclick="deleteTask(${t.id})" title="Supprimer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
+        </div>`;
+      }).join('');
+    }
+
+    // Stats
+    document.getElementById('cnt-total').textContent = tasks.length;
+    document.getElementById('cnt-done').textContent  = tasks.filter(t => t.done).length;
+    document.getElementById('cnt-left').textContent  = tasks.filter(t => !t.done).length;
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Enter key
+  document.getElementById('task-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  // Set today as default date
+  document.getElementById('date-input').value = new Date().toISOString().split('T')[0];
+
+  render();
+</script>
+</body>
+</html>
