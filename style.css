@@ -153,6 +153,21 @@
     .btn-add:hover { background: #145530; }
     .btn-add:active { transform: scale(.97); }
 
+    .btn-edit{
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--green);
+      padding: .2rem;
+      border-radius: 6px;
+      transition: all  .15s;
+    }
+    .btn-edit:hover{
+      background: rgba(26,107,60,.08);
+      transform: scale(1.1);
+    }
+
     .meta-row {
       display: flex;
       gap: .6rem;
@@ -322,4 +337,33 @@
       transition: all .15s;
     }
     .btn-clear:hover { border-color: var(--red); color: var(--red); }
+    @media (max-width:600px){
+      main{
+        padding: 1rem  .7rem  3rem;
+      }
+      .stats{
+        flex-direction: column;
+      }
+      .btn-add{
+        width: 100%;
+      }
+      .meta-row{
+      flex-direction: column;
+      }
+      .meta-row select,
+      .meta-row input{
+        width: 100%;
+      }
+      .filter{
+       justify-content: center;
+      }
+      .task-item{
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .btn-del,
+      .btn-edit{
+        align-items: flex-end;
+      }
+    }
   
